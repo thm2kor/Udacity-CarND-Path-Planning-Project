@@ -6,6 +6,8 @@
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
 #include "helpers.h"
+#include "spline.h"
+#include "planner.h"
 #include "json.hpp"
 
 // for convenience
@@ -90,7 +92,10 @@ int main() {
           // Sensor Fusion Data, a list of all other cars on the same side 
           //   of the road.
           auto sensor_fusion = j[1]["sensor_fusion"];
-
+          int prev_size = previous_path_x.size();
+          if (prev_size > 0) {
+              ego.s = end_path_s;
+          }
           json msgJson;
 
           vector<double> next_x_vals;
@@ -100,7 +105,7 @@ int main() {
           * TODO: define a path made up of (x,y) points that the car will visit
           *   sequentially every .02 seconds
           */
-          std::cout << " ######################################## " << std::endl;
+          std::cout << " --------------------------------------- " << std::endl;
           std::cout << "Ego vehicle s=" << ego.s << " d=" << ego.d << " @ lane=" << lane_names[get_lane(ego.d)] << std::endl;
           // Look for all the vehicles in the vicinity of the ego vehicle.
           for ( int i = 0; i < sensor_fusion.size(); i++ ) {
@@ -113,7 +118,7 @@ int main() {
               std::cout << "Vehicle-ID:" << i << " s=" << s << " d=" << d << " @ lane=" << lane_names[get_lane(d)] << std::endl;            
             }
           }
-          std::cout << " ######################################## " << std::endl;
+          std::cout << " --------------------------------------- " << std::endl;
 
           // Last stage
           /*double dist_inc = 0.5;

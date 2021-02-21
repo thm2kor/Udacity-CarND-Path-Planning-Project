@@ -15,6 +15,12 @@ const int LANE_RIGHT = 2;
 const double MAX_SPEED = 49.5; // 1% buffer with the target speed
 const double MAX_ACCL = 0.1; // 1g in SI
 const double MAX_DECL = 0.2; // 2g in SI
+// Weightages for costs
+const int COST_FEASIBILITY = 10000; // 
+const int COST_SAFETY      = 1000; // 
+const int COST_LEGALITY    = 100; // 
+const int COST_COMFORT     = 10; // 
+const int COST_EFFICIENCY  = 1; // 
 
 // for convenience
 using std::string;
