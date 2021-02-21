@@ -97,10 +97,25 @@ int main() {
           vector<double> next_y_vals;
 
           /**
-           * TODO: define a path made up of (x,y) points that the car will visit
-           *   sequentially every .02 seconds
-           */
-          std::cout << "Ego vehicle s=" << ego.s << " d=" << ego.d << " @ lane=" << ego.lane << std::endl;
+          * TODO: define a path made up of (x,y) points that the car will visit
+          *   sequentially every .02 seconds
+          */
+          std::cout << " ######################################## " << std::endl;
+          std::cout << "Ego vehicle s=" << ego.s << " d=" << ego.d << " @ lane=" << lane_names[get_lane(ego.d)] << std::endl;
+          // Look for all the vehicles in the vicinity of the ego vehicle.
+          for ( int i = 0; i < sensor_fusion.size(); i++ ) {
+            double d = sensor_fusion[i][6];             
+            if (d >= 0 && d <= d_right(LANE_RIGHT)) {
+              double vx = sensor_fusion[i][3];
+              double vy = sensor_fusion[i][4];
+              double v_magnitude = sqrt(vx*vx + vy*vy); 
+              double s = sensor_fusion[i][5];              
+              std::cout << "Vehicle-ID:" << i << " s=" << s << " d=" << d << " @ lane=" << lane_names[get_lane(d)] << std::endl;            
+            }
+          }
+          std::cout << " ######################################## " << std::endl;
+
+          // Last stage
           /*double dist_inc = 0.5;
           for (int i = 0; i < 50; ++i) {
             next_x_vals.push_back(car_x+(dist_inc*i)*cos(deg2rad(car_yaw)));
