@@ -13,6 +13,7 @@ using nlohmann::json;
 using std::string;
 using std::vector;
 
+
 int main() {
   uWS::Hub h;
 
@@ -50,7 +51,9 @@ int main() {
     map_waypoints_dy.push_back(d_y);
   }
 
-  h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
+  ego_vehicle ego(0, 0, 0, 0, 0, 0);
+  
+  h.onMessage([&ego, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
                &map_waypoints_dx,&map_waypoints_dy]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                uWS::OpCode opCode) {
@@ -70,12 +73,12 @@ int main() {
           // j[1] is the data JSON object
           
           // Main car's localization Data
-          double car_x = j[1]["x"];
-          double car_y = j[1]["y"];
-          double car_s = j[1]["s"];
-          double car_d = j[1]["d"];
-          double car_yaw = j[1]["yaw"];
-          double car_speed = j[1]["speed"];
+          ego.x = j[1]["x"];
+          ego.y = j[1]["y"];
+          ego.s = j[1]["s"];
+          ego.d = j[1]["d"];
+          ego.yaw = j[1]["yaw"];
+          ego.speed = j[1]["speed"];
 
           // Previous path data given to the Planner
           auto previous_path_x = j[1]["previous_path_x"];
@@ -97,8 +100,12 @@ int main() {
            * TODO: define a path made up of (x,y) points that the car will visit
            *   sequentially every .02 seconds
            */
-
-
+          std::cout << "Ego vehicle s=" << ego.s << " d=" << ego.d << " @ lane=" << ego.lane << std::endl;
+          /*double dist_inc = 0.5;
+          for (int i = 0; i < 50; ++i) {
+            next_x_vals.push_back(car_x+(dist_inc*i)*cos(deg2rad(car_yaw)));
+            next_y_vals.push_back(car_y+(dist_inc*i)*sin(deg2rad(car_yaw)));
+          }*/
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
 

@@ -4,6 +4,8 @@
 #include <math.h>
 #include <string>
 #include <vector>
+// Global Constants for the Project
+int LANE_WIDTH = 6;
 
 // for convenience
 using std::string;
@@ -153,5 +155,35 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s,
 
   return {x,y};
 }
+
+//convert speed between SI and US metric systems
+double mph_to_ms(double mph) { return mph / 2.24; }
+double ms_to_mph(double ms) { return ms * 2.24; }
+
+// return lane index based on the d frenet value
+int get_lane(double d) { return (int)(d / LANE_WIDTH); }
+// return the 'd' coordinates of a given lanes
+int d_left(int lane) { return (double)(lane * LANE_WIDTH); }
+int d_center(int lane) { return (double)((lane + 0.5) * LANE_WIDTH); }
+int d_right(int lane) { return (double)((lane + 1) * LANE_WIDTH); }
+
+class ego_vehicle{
+public:
+  //vehicle coordinates in cartesian coordinates
+  double x;
+  double y;
+  //vehicle coordinates in frenet coordinates
+  double s;
+  double d;
+  //vehicle motion parameters
+  double yaw;
+  double speed;
+  //vehicle current lane
+  int lane;
+  ego_vehicle(double _x, double _y, double _s, double _d, double _yaw, double _speed) : x(_x), y(_y), 
+                                                  s(_s), d(_d), yaw(_yaw), speed(_speed) {
+    lane = get_lane(d);
+  }
+};
 
 #endif  // HELPERS_H
