@@ -4,23 +4,6 @@
 #include <math.h>
 #include <string>
 #include <vector>
-// Global Constants for the Project
-// Road parameters
-const int LANE_WIDTH = 4;
-// Lane Index
-const int LANE_LEFT = 0;
-const int LANE_CENTER = 1;
-const int LANE_RIGHT = 2;
-// Motion parameters
-const double MAX_SPEED = 49.5; // 1% buffer with the target speed
-const double MAX_ACCL = 0.1; // 1g in SI
-const double MAX_DECL = 0.2; // 2g in SI
-// Weightages for costs
-const int COST_FEASIBILITY = 10000; // 
-const int COST_SAFETY      = 1000; // 
-const int COST_LEGALITY    = 100; // 
-const int COST_COMFORT     = 10; // 
-const int COST_EFFICIENCY  = 1; // 
 
 // for convenience
 using std::string;
@@ -171,50 +154,7 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s,
   return {x,y};
 }
 
-//convert speed between SI and US metric systems
-double mph_to_ms(double mph) { return mph / 2.24; } 
-double ms_to_mph(double ms) { return ms * 2.24; } 
 
-// return lane index based on the d frenet value
-int get_lane(double d) { return (int)(d / LANE_WIDTH); }
-// return the 'd' coordinates of a given lanes
-int d_left(int lane) { return (double)(lane * LANE_WIDTH); }
-int d_center(int lane) { return (double)((lane + 0.5) * LANE_WIDTH); }
-int d_right(int lane) { return (double)((lane + 1) * LANE_WIDTH); }
 
-class ego_vehicle {
-public:
-  //vehicle coordinates in cartesian coordinates
-  double x;
-  double y;
-  //vehicle coordinates in frenet coordinates
-  double s;
-  double d;
-  //vehicle motion parameters
-  double yaw;
-  double speed;
-  //vehicle current lane
-  int lane;
-  ego_vehicle(double _x, double _y, double _s, double _d, double _yaw, double _speed) : x(_x), y(_y), 
-                                                  s(_s), d(_d), yaw(_yaw), speed(_speed) {
-    lane = get_lane(d);
-  }
-}; 
-
-enum vehicle_states {
-  follow_vehicle              = 0, 
-  prepare_lanechange_left     = 1,
-  lanechange_left             = 2, 
-  prepare_lanechange_right    = 3,
-  lanechange_right            = 4
-};
-
-enum lanes {
-  left      = 0,
-  center    = 1,
-  right     = 2,
-};
-
-const char * lane_names[] = { "LEFT", "CENTER", "RIGHT" };
 
 #endif  // HELPERS_H

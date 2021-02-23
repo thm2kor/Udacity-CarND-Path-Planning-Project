@@ -6,6 +6,7 @@
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
 #include "helpers.h"
+#include "config.h"
 #include "spline.h"
 #include "planner.h"
 #include "json.hpp"
@@ -53,10 +54,13 @@ int main() {
     map_waypoints_dy.push_back(d_y);
   }
 
-  ego_vehicle ego(0, 0, 0, 0, 0, 0);
+  bool first = true;
+  Planner planner;
+  double reference_velocity = 0;
+  int lane_start = LANE_CENTER;
   
-  h.onMessage([&ego, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
-               &map_waypoints_dx,&map_waypoints_dy]
+  h.onMessage([&planner, &reference_velocity, &first, &lane_start, &map_waypoints_x, &map_waypoints_y, &map_waypoints_s,
+               &map_waypoints_dx, &map_waypoints_dy]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -74,58 +78,62 @@ int main() {
         if (event == "telemetry") {
           // j[1] is the data JSON object
           
-          // Main car's localization Data
-          ego.x = j[1]["x"];
-          ego.y = j[1]["y"];
-          ego.s = j[1]["s"];
-          ego.d = j[1]["d"];
-          ego.yaw = j[1]["yaw"];
-          ego.speed = j[1]["speed"];
-
+          // Step 1: Main car's localization Data
+          double car_x = j[1]["x"];
+          double car_y = j[1]["y"];
+          double car_s = j[1]["s"];
+          double car_d = j[1]["d"];
+          double car_yaw = j[1]["yaw"];
+          double car_speed = j[1]["speed"];
+          
           // Previous path data given to the Planner
           auto previous_path_x = j[1]["previous_path_x"];
-          auto previous_path_y = j[1]["previous_path_y"];
+          auto previous_path_y = j[1]["previous_path_y"];                  
           // Previous path's end s and d values 
           double end_path_s = j[1]["end_path_s"];
           double end_path_d = j[1]["end_path_d"];
-
+          
           // Sensor Fusion Data, a list of all other cars on the same side 
           //   of the road.
           auto sensor_fusion = j[1]["sensor_fusion"];
-          int prev_size = previous_path_x.size();
-          if (prev_size > 0) {
-              ego.s = end_path_s;
+          
+          //set-up the planner object
+          planner.add_ego(car_x, car_y, car_s, car_d, car_yaw, car_speed);
+          for (int i = 0; i < sensor_fusion.size(); i++) {
+            double d = sensor_fusion[i][6];             
+            if (d >= 0 && d <= d_right(LANE_RIGHT)) {
+              Vehicle *vehicle = new Vehicle(static_cast<int>(sensor_fusion[i][0]), sensor_fusion[i][1],
+                                      sensor_fusion[i][2], sensor_fusion[i][3], sensor_fusion[i][4], 
+                                      sensor_fusion[i][5], sensor_fusion[i][6]);
+              planner.update_vehicle(vehicle);
+            }
           }
+          // predict the next position based on the kinematic motion models
+          planner.update_kinematics(PREDICTION_TIME);
+          planner.get_next_state();
+          
           json msgJson;
-
           vector<double> next_x_vals;
           vector<double> next_y_vals;
-
           /**
           * TODO: define a path made up of (x,y) points that the car will visit
           *   sequentially every .02 seconds
           */
-          std::cout << " --------------------------------------- " << std::endl;
-          std::cout << "Ego vehicle s=" << ego.s << " d=" << ego.d << " @ lane=" << lane_names[get_lane(ego.d)] << std::endl;
-          // Look for all the vehicles in the vicinity of the ego vehicle.
-          for ( int i = 0; i < sensor_fusion.size(); i++ ) {
-            double d = sensor_fusion[i][6];             
-            if (d >= 0 && d <= d_right(LANE_RIGHT)) {
-              double vx = sensor_fusion[i][3];
-              double vy = sensor_fusion[i][4];
-              double v_magnitude = sqrt(vx*vx + vy*vy); 
-              double s = sensor_fusion[i][5];              
-              std::cout << "Vehicle-ID:" << i << " s=" << s << " d=" << d << " @ lane=" << lane_names[get_lane(d)] << std::endl;            
-            }
-          }
-          std::cout << " --------------------------------------- " << std::endl;
+          
+          
+          
+          /*} else {
+            std::cout << "checking " << planner.vehicles_added << " vehicles ..." << std::endl;
+            map<int, Vehicle>::iterator it = planner.vehicles.begin();
 
-          // Last stage
-          /*double dist_inc = 0.5;
-          for (int i = 0; i < 50; ++i) {
-            next_x_vals.push_back(car_x+(dist_inc*i)*cos(deg2rad(car_yaw)));
-            next_y_vals.push_back(car_y+(dist_inc*i)*sin(deg2rad(car_yaw)));
+            while (it != planner.vehicles.end()) {              
+              int v_id = it->first;
+              Vehicle v = it->second;
+              std::cout << "... " << v.lane << std::endl;
+              ++it;
+            } 
           }*/
+            
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
 
