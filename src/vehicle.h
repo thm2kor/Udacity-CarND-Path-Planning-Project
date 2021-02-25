@@ -14,33 +14,25 @@ class Vehicle {
   // Constructors
   Vehicle();
   Vehicle(int id, double x, double y, double s, double d, double yaw, double velocity);
+  ~Vehicle();
   void update_kinematics(double delta_t);
   double get_distance_to (Vehicle *other);
   double get_timegap_to (Vehicle *other);
   double get_collision_time_to (Vehicle *other);
+
+public:
   //Identifier for the vehicle
   int id; 
-  // vehicle position in cartesian coordinates (current and predicted)
+  // vehicle position in cartesian coordinates 
   double x; double y;
-  vector<double> pred_trj_x; 
-  vector<double> pred_trj_y; 
-  // vehicle position in frenet coordinates  (current and predicted)
+  // vehicle position in frenet coordinates 
   double s; double d;
-  vector<double> pred_trj_s; 
-  vector<double> pred_trj_d; 
-  // velocity in x and y directions (current and predicted)
+  // velocity in x and y directions 
   double vx; double vy; double v_magnitude;
-  vector<double> pred_trj_vx;
-  vector<double> pred_trj_vy;
-  vector<double> pred_trj_v_mag;
-  // acceleration in x and y directions (current and predicted)
+  // acceleration in x and y directions 
   double ax; double ay; double a_magnitude;
-  vector<double> pred_trj_ax;
-  vector<double> pred_trj_ay;
-  vector<double> pred_trj_a_mag; 
-  // yaw angle (current and predicted)
+  // yaw angle 
   double yaw;
-  vector<double> pred_trj_yaw;
   // lane on which the vehicle is currently driving
   int lane;
   //position w.r.t to the ego vehicle

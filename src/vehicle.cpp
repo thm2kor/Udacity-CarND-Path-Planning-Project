@@ -28,7 +28,7 @@ Vehicle::Vehicle(){
   lane = -1;
 }
 
-Vehicle::Vehicle(int id, double x, double y, double s, double d, double yaw, double velocity) {
+Vehicle::Vehicle( int id, double x, double y, double vx, double vy, double s, double d) {
   this->id = id;
   this->x = x;
   this->y = y;
@@ -36,42 +36,26 @@ Vehicle::Vehicle(int id, double x, double y, double s, double d, double yaw, dou
   this->s = s;
   this->d = d;
 
-  this->vx = 0.0f;
-  this->vy = 0.0f;
-  v_magnitude = velocity;
+  this->vx = vx;
+  this->vy = vy;
+  v_magnitude = sqrt(pow(vx, 2) + pow(vy, 2)) ;
 
   ax = 0.0;
   ay = 0.0;
-  a_magnitude = sqrt(pow(ax, 2) + pow(ay, 2));
+  a_magnitude = 0.0;
   
-  yaw = yaw;
+  this->yaw = 0;
   
   lane = get_lane(d); 
+  //std::cout << "New vehicle-" << this->id << " at lane :" << lane << std::endl; 
+}
+
+Vehicle::~Vehicle() {
+  //std::cout << "Delete vehicle-" << this->id << " at lane :" << lane << std::endl; 
 }
 
 void Vehicle::update_kinematics(double delta_t) {
-
-  pred_trj_x.clear();
-  pred_trj_y.clear();
-  pred_trj_s.clear();
-  pred_trj_d.clear();
-  pred_trj_vx.clear();
-  pred_trj_vy.clear();
-  pred_trj_v_mag.clear();
-  pred_trj_ax.clear();
-  pred_trj_ay.clear();
-  pred_trj_a_mag.clear();
-  pred_trj_yaw.clear();
-
-  for (int i = 0; i < (delta_t / CYCLE_TIME); ++i) {
-    double dt = i * CYCLE_TIME;
-    pred_trj_x.push_back(x + (vx * dt + 0.5 * ax * pow(dt, 2)));
-    pred_trj_y.push_back(y + (vy * dt + 0.5 * ay * pow(dt, 2)));
-
-    pred_trj_vx.push_back(vx + ax * delta_t);
-    pred_trj_vy.push_back(vy + ay * delta_t);
-    pred_trj_v_mag.push_back(v_magnitude + a_magnitude * delta_t);
-  }
+  this->s+= v_magnitude*delta_t;
 }
 
 double Vehicle::get_distance_to (Vehicle *other) {

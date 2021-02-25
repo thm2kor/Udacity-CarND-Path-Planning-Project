@@ -1,6 +1,14 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <math.h>
+#include <string>
+#include <vector>
+
+// for convenience
+using std::string;
+using std::vector;
+
 enum Ego_State {
   invalid_state               = 0,
   follow_vehicle_in_lane      = 1, 
@@ -16,7 +24,27 @@ enum lanes {
   right     = 2,
 };
 
-//const char * lane_names[] = { "LEFT", "CENTER", "RIGHT" };
+double deg2rad(double x); 
+double rad2deg(double x); 
+
+// Calculate distance between two points
+double distance(double x1, double y1, double x2, double y2) ;
+
+// Calculate closest waypoint to current x, y position
+int ClosestWaypoint(double x, double y, const vector<double> &maps_x, 
+                    const vector<double> &maps_y) ;
+
+// Returns next waypoint of the closest waypoint
+int NextWaypoint(double x, double y, double theta, const vector<double> &maps_x, 
+                 const vector<double> &maps_y) ;
+// Transform from Cartesian x,y coordinates to Frenet s,d coordinates
+vector<double> getFrenet(double x, double y, double theta, 
+                         const vector<double> &maps_x, 
+                         const vector<double> &maps_y) ;
+// Transform from Frenet s,d coordinates to Cartesian x,y
+vector<double> getXY(double s, double d, const vector<double> &maps_s, 
+                     const vector<double> &maps_x, 
+                     const vector<double> &maps_y) ;
 
 
 //convert speed between SI and US metric systems
@@ -37,10 +65,13 @@ const int LANE_WIDTH = 4;
 const int LANE_LEFT = 0;
 const int LANE_CENTER = 1;
 const int LANE_RIGHT = 2;
+
+const int START_LANE = LANE_CENTER; 
+
 // Motion parameters
 const double MAX_SPEED = 49.5; // speed limit in miles
-const double MAX_ACCL = 0.224; // 1g in SI
-const double MAX_DECL = 0.224; // 2g in SI
+const double MAX_ACCL = 0.224; // 
+const double MAX_DECL = 0.224; // 
 // Weightages for costs
 const int COST_FEASIBILITY = 10000; // 
 const int COST_SAFETY      = 1000; // 
@@ -50,20 +81,8 @@ const int COST_EFFICIENCY  = 1; //
 
 const int HORIZON_IN_METERS = 30;
 static constexpr double CYCLE_TIME = 0.02; 
-static const int PREDICTION_DISTANCE = 50; 
+const int PREDICTION_DISTANCE = 50; 
 static constexpr double PREDICTION_TIME = CYCLE_TIME * (double) PREDICTION_DISTANCE;
 
-/*static constexpr double DEFAULT_TIME_GAP = 9999.9; // default resp. max time gap [s]
-static constexpr double DEFAULT_TIME_TO_COLLISION = 9999.9; // default resp. max time-to-collision [s]
-static constexpr double DEFAULT_DISTANCE = 9999.9; // default resp. max distance to vehicles [m]
-static constexpr double LOWER_TIME_GAP = 1.5; // min allowed time gap to vehicle ahead [s]
-static constexpr double UPPER_TIME_GAP = 3.5; // time gap [s] to drive with speed limit
-static constexpr double MIN_TIME_GAP_INIT_LANE_CHANGE = 3.0; // min allowed time gap to initiate a lane change [s]
-static constexpr double MIN_TIME_GAP_LANE_CHANGE = 1.0; // min required time gap to vehicle in target lane [s]
-static constexpr double MIN_DISTANCE_FRONT_LANE_CHANGE = 10.0; // min required distance to vehicle ahead in target lane [m]
-static constexpr double MIN_DISTANCE_REAR_LANE_CHANGE = 10.0; // min required distance to vehicle behind in target lane [m]
-static constexpr double MIN_TTC_FRONT_LANE_CHANGE = 6.0; // min required time-to-collision to vehicle ahead in target lane [s]
-static constexpr double MIN_TTC_REAR_LANE_CHANGE = 6.0; // min required time-to-collision to vehicle behind in target lane [s]
-static constexpr double FASTEST_LANE_FACTOR = 0.08; // the fastest lane velocity need to  be x% faster than the current [%]
-*/
+
 #endif  // CONFIG_H
