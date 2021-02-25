@@ -13,10 +13,6 @@ using std::vector;
 class Planner
 {
 public:
-  // the actual (x,y) points that will be sent to the simulator
-  vector<double> next_x_vals;
-  vector<double> next_y_vals;
-public:
   //Ego vehicle and its current state
   Vehicle ego;
   Ego_State current_state;
@@ -25,7 +21,10 @@ public:
   int target_lane = 0;
   //int reference_velocity = 0;
   //int target_velocity = 0;
-
+  
+  vector<double> next_x_vals;
+  vector<double> next_y_vals;
+  
   vector<double> map_waypoints_x;
   vector<double> map_waypoints_y;
   vector<double> map_waypoints_s;
@@ -59,7 +58,7 @@ public:
   Ego_State execute_prep_right_lanechange();
   Ego_State execute_right_lanechange();
   
-  void prepare_trajectory (vector<double> previous_path_x, vector<double> previous_path_y, double end_path_s);
+  void prepare_trajectory (vector<double> previous_path_x, vector<double> previous_path_y, double end_path_s, double &ref_vel);
   
   void remove_other_vehicles();
 
