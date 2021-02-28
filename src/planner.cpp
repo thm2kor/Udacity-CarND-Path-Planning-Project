@@ -93,10 +93,10 @@ bool Planner::is_lane_clear (int lane) {
   for (auto obj: other_vehicles) {
     if (obj.second->lane == lane) {
       //if the difference between a vehicle and the ego is less than 30
-      if ( abs( ego.s - obj.second->s ) < 25) {
+      /*if ( abs( ego.s - obj.second->s ) < 25) {
         cout << "Vehicle " << obj.second->id << " is quite near the ego. obj.s value is " 
         << obj.second->s << " ego.s is " << ego.s << endl;
-      }      
+      }*/  
       result &= abs(obj.second->s - ego.s) > 25;
     }
   }
@@ -145,7 +145,7 @@ Vehicle *Planner::get_vehicle_behind(int lane) {
   return next_vehicle;
 }
 
-Ego_State Planner::get_next_state() {
+Ego_State Planner::execute_next_state() {
   Ego_State new_state = Ego_State::invalid_state;
   switch (current_state) {
     case Ego_State::follow_vehicle_in_lane:
@@ -185,7 +185,7 @@ Ego_State Planner::execute_followlane() {
       if (is_lane_valid(ego.lane-1) && is_lane_clear(ego.lane-1)){ 
         cout << "left lane clear .." << endl;       
         target_lane = ego.lane-1;
-        ego.v_magnitude = ahead->v_magnitude;
+        ego.v_magnitude = ahead->v_magnitude; // TODO: Check this ??
         return Ego_State::lanechange_left;
       } 
       cout << "left lane not clear. checking for vehicle on right lane with index " << ego.lane+1 << endl;
@@ -227,7 +227,7 @@ Ego_State Planner::execute_right_lanechange(){
 }
 
 void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double> previous_path_y, 
-                                               double end_path_s, double &ref_vel) {
+                                               double end_path_s, double &reference_velocity) {
   vector<double> ptsx;
   vector<double> ptsy;
   
@@ -263,12 +263,9 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
       ptsy.push_back(ref_y);
   }
   
-  int lane = target_lane;
-  // cout << "target lane : " << lane << endl;
-  // Setting up target points in the future.
-  vector<double> next_wp0 = getXY(ego.s + 30, 2 + 4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
-  vector<double> next_wp1 = getXY(ego.s + 60, 2 + 4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
-  vector<double> next_wp2 = getXY(ego.s + 90, 2 + 4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
+  vector<double> next_wp0 = getXY(ego.s + 30, 2 + 4*target_lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
+  vector<double> next_wp1 = getXY(ego.s + 60, 2 + 4*target_lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
+  vector<double> next_wp2 = getXY(ego.s + 90, 2 + 4*target_lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
 
   ptsx.push_back(next_wp0[0]);
   ptsx.push_back(next_wp1[0]);
@@ -285,13 +282,8 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
 
     ptsx[i] = shift_x * cos(0 - ref_yaw) - shift_y * sin(0 - ref_yaw);
     ptsy[i] = shift_x * sin(0 - ref_yaw) + shift_y * cos(0 - ref_yaw);
-    // std::cout << ptsx[i] << " " << ptsy[i] << std::endl;
   }
-  // std:cout << ego << std::endl;
-  
-  // std::cout << "Incoming data " << std::endl;
-  // std::cout << std::make_pair(next_x_vals, next_y_vals) << std::endl;
-  
+   
   // Create the spline.
   tk::spline s;
   s.set_points(ptsx, ptsy);
@@ -301,7 +293,6 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
     next_y_vals.push_back(previous_path_y[i]);
   }
 
-  // Calculate distance y position on 30 m ahead.
   double target_x = 30.0;
   double target_y = s(target_x);
   double target_dist = sqrt(target_x*target_x + target_y*target_y);
@@ -309,15 +300,14 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
   double x_add_on = 0;
 
   for( int i = 1; i < 50 - prev_size; i++ ) {
-    ref_vel += ego.v_delta;
-    if ( ref_vel > MAX_SPEED ) {
-      ref_vel = MAX_SPEED;
-      //std::cout << "limiting speed to " << ref_vel << std::endl;
-    } else if ( ref_vel < MAX_ACCL ) {
-      ref_vel = MAX_ACCL;
+    reference_velocity += ego.v_delta;
+    if ( reference_velocity > MAX_SPEED ) {
+      reference_velocity = MAX_SPEED;
+    } else if ( reference_velocity < MAX_ACCL ) {
+      reference_velocity = MAX_ACCL;
     }
-    //std::cout << "ref_vel is " << ref_vel << std::endl;
-    double N = target_dist/(0.02*ref_vel/2.24);
+
+    double N = target_dist/(0.02*reference_velocity/2.24);
     double x_point = x_add_on + target_x/N;
     double y_point = s(x_point);
 
@@ -336,6 +326,4 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
     next_x_vals.push_back(x_point);
     next_y_vals.push_back(y_point);
   }
-  //std::cout << "Output for simulator " << std::endl;
-  //std::cout << std::make_pair(next_x_vals, next_y_vals) << std::endl;
 }

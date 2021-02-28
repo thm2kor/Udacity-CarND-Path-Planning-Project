@@ -54,12 +54,11 @@ int main() {
     map_waypoints_dy.push_back(d_y);
   }
 
-  bool first = true;
   Planner planner;
-  double ref_vel = 0.0;
+  double reference_velocity = 0.0;
   int lane_start = LANE_CENTER;
   
-  h.onMessage([&planner, &ref_vel, &first, &lane_start, &map_waypoints_x, &map_waypoints_y, &map_waypoints_s,
+  h.onMessage([&planner, &reference_velocity, &lane_start, &map_waypoints_x, &map_waypoints_y, &map_waypoints_s,
                &map_waypoints_dx, &map_waypoints_dy]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                uWS::OpCode opCode) {
@@ -116,7 +115,7 @@ int main() {
           // get the next plausible state
           planner.execute_next_state();
           // calculate the trajectory
-          planner.prepare_trajectory(previous_path_x, previous_path_y, end_path_s, ref_vel);
+          planner.prepare_trajectory(previous_path_x, previous_path_y, end_path_s, reference_velocity);
           
           msgJson["next_x"] = planner.next_x_vals;
           msgJson["next_y"] = planner.next_y_vals;
