@@ -18,7 +18,7 @@ public:
   Ego_State current_state;
   //Map of all vehicles including the ego vehicles
   std::map<int, Vehicle*> other_vehicles;
-  int target_lane = 0;
+  int target_lane = 0; 
   //int reference_velocity = 0;
   //int target_velocity = 0;
   
@@ -51,14 +51,14 @@ public:
   bool is_lane_valid (int lane);
   
   // Stage  3: State Estimation
-  Ego_State get_next_state();
+  Ego_State execute_next_state();
   Ego_State execute_followlane();
-  Ego_State execute_prep_left_lanechange();
   Ego_State execute_left_lanechange();
-  Ego_State execute_prep_right_lanechange();
   Ego_State execute_right_lanechange();
   
+  // Stage 4: Execute Trajectory
   void prepare_trajectory (vector<double> previous_path_x, vector<double> previous_path_y, double end_path_s, double &ref_vel);
+  
   
   void remove_other_vehicles();
 

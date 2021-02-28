@@ -99,29 +99,22 @@ int main() {
           
           // Provided previous path point size.
           int prev_size = previous_path_x.size();
-          //std::cout << "prev_size is " << prev_size << std::endl;
-          /*for ( int i = 0; i < prev_size; i++ ) {
-            std::cout << "incoming " << previous_path_x [i] << " " << previous_path_y [i] << std::endl;
-          }*/
-          // Preventing collitions.
+          
           if (prev_size > 0) {
             car_s = end_path_s;
           }
           
           json msgJson;
 
-          /**
-          * TODO: define a path made up of (x,y) points that the car will visit
-          *   sequentially every .02 seconds
-          */
           // set-up the traffic environment for the planner.
+          // std::cout << "Planner current state is " << planner.current_state << std::endl;
           planner.add_ego(car_x, car_y, car_s, car_d, car_yaw, car_speed);
           planner.add_other_traffic_participants(sensor_fusion);
           planner.set_waypoints(map_waypoints_x, map_waypoints_y, map_waypoints_s);          
           // predict the next position of the based on the kinematic motion models
           planner.predict(PREDICTION_TIME);
           // get the next plausible state
-          planner.get_next_state();
+          planner.execute_next_state();
           // calculate the trajectory
           planner.prepare_trajectory(previous_path_x, previous_path_y, end_path_s, ref_vel);
           
@@ -132,9 +125,7 @@ int main() {
 
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
           // clear the pointers to other vehicles.
-          //std::cout << "Calculations based on " << planner.get_vehicle_count() << " vehicles" << std::endl;
-          //planner.remove_other_vehicles();
-          //std::cout << "After removing... vehicle count is " << planner.get_vehicle_count() << std::endl;
+          // planner.remove_other_vehicles();
         }  // end "telemetry" if
       } else {
         // Manual driving

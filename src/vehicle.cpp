@@ -26,6 +26,7 @@ Vehicle::Vehicle(){
   yaw = 0.0;
 
   lane = -1;
+  v_delta = 0.0;
 }
 
 Vehicle::Vehicle( int id, double x, double y, double vx, double vy, double s, double d) {
@@ -47,6 +48,7 @@ Vehicle::Vehicle( int id, double x, double y, double vx, double vy, double s, do
   this->yaw = 0;
   
   lane = get_lane(d); 
+  v_delta = 0.0;
   //std::cout << "New vehicle-" << this->id << " at lane :" << lane << std::endl; 
 }
 

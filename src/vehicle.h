@@ -28,7 +28,7 @@ public:
   // vehicle position in frenet coordinates 
   double s; double d;
   // velocity in x and y directions 
-  double vx; double vy; double v_magnitude;
+  double vx; double vy; double v_magnitude; double v_delta;
   // acceleration in x and y directions 
   double ax; double ay; double a_magnitude;
   // yaw angle 

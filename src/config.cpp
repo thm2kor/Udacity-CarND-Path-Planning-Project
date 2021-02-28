@@ -1,5 +1,56 @@
 #include "config.h"
 
+std::ostream& operator<<(std::ostream& strm, const Vehicle &a) {
+  return strm << "Vehicle(id " << a.id << ") in (lane = " 
+              << a.lane << ") x= (" << a.x << ") y= (" << a.y << ") (s= " << a.s << ") (v= " 
+              << a.v_magnitude << ")" ;
+}
+
+std::ostream& operator<<(std::ostream& strm, std::map<int, Vehicle> &vehicles) {
+  map<int, Vehicle>::iterator it = vehicles.begin();
+  while (it != vehicles.end()) {
+    strm << it->second << std::endl;
+    ++it;
+  }
+  return strm << "---------------------" ;
+}
+
+std::ostream& operator<<(std::ostream& strm, std::map<int ,vector<Vehicle>> &trajectories) {
+  map<int ,vector<Vehicle>>::iterator it = trajectories.begin();
+  while (it != trajectories.end()) {
+    vector<Vehicle> vehicles = it->second;
+    for (int i=0;i<vehicles.size();i++){
+      strm << vehicles[i] << std::endl;
+    }
+    ++it;
+  }
+  return strm << "---------------------" ;
+}
+
+std::ostream& operator<<(std::ostream& strm, vector<Vehicle> &vehicles) {
+  for (int i=0;i<vehicles.size();i++){
+    strm << vehicles[i] << std::endl;
+  }
+  return strm << "---------------------" ;
+}
+
+std::ostream& operator<<(std::ostream& strm, std::pair<std::vector<double>, std::vector<double>> points) {
+  for (int i=0;i<points.first.size();i++){
+    strm << points.first[i] << " , " <<points.second[i] << std::endl;
+  }
+  return strm << "---------------------" ;
+}
+
+std::ostream& operator<<(std::ostream& strm, const vector<float> &d) {
+  strm << "[" ;
+  for (int i=0;i<d.size();i++) {
+    strm << d[i];
+    if (i != d.size() - 1)
+         strm << ", ";
+  } 
+  return strm << "]" << std::endl ;
+}
+
 //convert speed between SI and US metric systems
 double mph_to_ms(double mph) { 
   return mph / 2.24; 

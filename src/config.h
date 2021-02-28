@@ -4,18 +4,26 @@
 #include <math.h>
 #include <string>
 #include <vector>
-
+#include <iostream>
+#include "vehicle.h"
+#include <map>
 // for convenience
 using std::string;
 using std::vector;
 
+// debug functions for dumping the objects
+std::ostream& operator<<(std::ostream& strm, const Vehicle &a);
+std::ostream& operator<<(std::ostream& strm, std::map<int, Vehicle> &vehicles);
+std::ostream& operator<<(std::ostream& strm, std::map<int ,vector<Vehicle>> &trajectories);
+std::ostream& operator<<(std::ostream& strm, vector<Vehicle> &vehicles);
+std::ostream& operator<<(std::ostream& strm, std::pair<std::vector<double>, std::vector<double>> points);
+std::ostream& operator<<(std::ostream& strm, const vector<float> &d);
+
 enum Ego_State {
   invalid_state               = 0,
   follow_vehicle_in_lane      = 1, 
-  prepare_lanechange_left     = 2,
-  lanechange_left             = 3, 
-  prepare_lanechange_right    = 4,
-  lanechange_right            = 5
+  lanechange_left             = 2, 
+  lanechange_right            = 3
 };
 
 enum lanes {

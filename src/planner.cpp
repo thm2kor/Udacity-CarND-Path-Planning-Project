@@ -14,7 +14,6 @@ Planner::Planner()
 {
   current_state = Ego_State::follow_vehicle_in_lane;
   target_lane = START_LANE;
-
 }
 
 Planner::~Planner()
@@ -94,7 +93,11 @@ bool Planner::is_lane_clear (int lane) {
   for (auto obj: other_vehicles) {
     if (obj.second->lane == lane) {
       //if the difference between a vehicle and the ego is less than 30
-      result &= abs(obj.second->s - ego.s) < 30;
+      if ( abs( ego.s - obj.second->s ) < 25) {
+        cout << "Vehicle " << obj.second->id << " is quite near the ego. obj.s value is " 
+        << obj.second->s << " ego.s is " << ego.s << endl;
+      }      
+      result &= abs(obj.second->s - ego.s) > 25;
     }
   }
   return result;
@@ -148,14 +151,8 @@ Ego_State Planner::get_next_state() {
     case Ego_State::follow_vehicle_in_lane:
       new_state = execute_followlane();
       break;
-    case Ego_State::prepare_lanechange_left:
-      new_state = execute_prep_left_lanechange();
-      break;
     case Ego_State::lanechange_left:
       new_state = execute_left_lanechange();
-      break;
-    case Ego_State::prepare_lanechange_right:
-      new_state = execute_prep_right_lanechange();
       break;
     case Ego_State::lanechange_right:
       new_state = execute_right_lanechange();
@@ -165,14 +162,14 @@ Ego_State Planner::get_next_state() {
       break;
   }
   if (new_state != current_state) {
-    cout << "Lane state change: new=" << state_names[new_state] << ", previous= " << state_names[current_state] << endl;
+    // cout << "Lane state change: new=" << state_names[new_state] << ", previous= " << state_names[current_state] << endl;
     current_state = new_state;
   }
   return current_state;
 }
 
 bool Planner::is_lane_valid(int lane){
-  return (lane >= 0) && (lane <=3);
+  return (lane >= 1) && (lane <3);
 }
 
 Ego_State Planner::execute_followlane() {
@@ -180,59 +177,53 @@ Ego_State Planner::execute_followlane() {
   Ego_State new_state = Ego_State::follow_vehicle_in_lane;
   Vehicle *ahead = get_vehicle_ahead(ego.lane);
   
-  if (ahead) { //if there is a vehicle ahead of the ego vehicle
-    if ((ahead->s > ego.s) && ((ahead->s - ego.s) < 30))
-    { // if the distance between the ego and vehicle ahead is less than 30m
-      // prepare to turn left, if there is a left lane available 
-      if (is_lane_valid(ego.lane-1)){
-        target_lane--;
-        new_state = Ego_State::prepare_lanechange_left;
-      } else if (is_lane_valid(ego.lane+1)) {
-        // left lane not available, prepare to turn right, if there is a right lane available,
-        // and clear of vehicles for 30m,
-        target_lane++;
-        new_state = Ego_State::prepare_lanechange_right;
+  if (ahead) { 
+    if ((ahead->s > ego.s) && ((ahead->s - ego.s) < 30)) //TODO check for vehicles from behind
+    { 
+      //cout << "vehicle " << ahead->id << " ahead within a reaching distance of  " << (ahead->s - ego.s) << endl;
+      cout << "checking for vehicle on left lane with index " << ego.lane-1 << endl;      
+      if (is_lane_valid(ego.lane-1) && is_lane_clear(ego.lane-1)){ 
+        cout << "left lane clear .." << endl;       
+        target_lane = ego.lane-1;
+        ego.v_magnitude = ahead->v_magnitude;
+        return Ego_State::lanechange_left;
+      } 
+      cout << "left lane not clear. checking for vehicle on right lane with index " << ego.lane+1 << endl;
+      if (is_lane_valid(ego.lane+1) && is_lane_clear(ego.lane+1)) {
+        cout << "right lane clear .." << endl;    
+        target_lane = ego.lane+1;
+        return Ego_State::lanechange_right;
       } else {
-        //no where to go. declerate and stay on the current lane
-        ego.v_magnitude -= MAX_ACCL;
+        // no where to go. declerate and stay on the current lane
+        cout << "no where to go. slow down .... " << endl;
+        ego.v_delta -= MAX_ACCL;
+        return Ego_State::follow_vehicle_in_lane;
       }
     }
     else {
-      // cout << "vehicle " << ahead->id << " ahead within a reaching distance of  " << (ahead->s - ego.s) << endl;
-      ego.v_magnitude += MAX_ACCL;
-      // cout << "increasing speed to " << ego.v_magnitude << endl;
-      new_state = Ego_State::follow_vehicle_in_lane;
+      ego.v_delta += MAX_ACCL;
     }    
   } else {   
-    //cout << "no vehicle ahead in lane " << ego.lane << ". Accelerate ..." << endl;
-    ego.v_magnitude += MAX_ACCL;
+    ego.v_delta += MAX_ACCL;
     new_state = Ego_State::follow_vehicle_in_lane;
   }
   return new_state;
 }
 
-Ego_State Planner::execute_prep_left_lanechange(){
-  Ego_State new_state = Ego_State::lanechange_left;
-  //check if there are no vehicles 30 min before and after the ego vehicle
-  if ( !is_lane_clear(target_lane) ){ 
-    cout << "left lane not clear. stay in lane and look for alternate options" << endl;
-    target_lane++;
-    new_state = Ego_State::follow_vehicle_in_lane;  
-  }
-  return new_state;
-}
-
 Ego_State Planner::execute_left_lanechange(){
-  ego.lane = target_lane;
-  return Ego_State::follow_vehicle_in_lane;
-}
-
-Ego_State Planner::execute_prep_right_lanechange(){
-  return Ego_State::follow_vehicle_in_lane;
+  if (ego.lane == target_lane){
+    return Ego_State::follow_vehicle_in_lane;
+  } else {
+    return Ego_State::lanechange_left;
+  }
 }
 
 Ego_State Planner::execute_right_lanechange(){
-  return Ego_State::follow_vehicle_in_lane;
+  if (ego.lane == target_lane){
+    return Ego_State::follow_vehicle_in_lane;
+  } else {
+    return Ego_State::lanechange_right;
+  }
 }
 
 void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double> previous_path_y, 
@@ -248,9 +239,8 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
   double ref_y = ego.y;
   double ref_yaw = deg2rad(ego.yaw);
   int prev_size = previous_path_x.size();
-  // Do I have have previous points
+
   if ( prev_size < 2 ) {
-      // There are not too many...
       double prev_car_x = ego.x - cos(ego.yaw);
       double prev_car_y = ego.y - sin(ego.yaw);
 
@@ -260,10 +250,8 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
       ptsy.push_back(prev_car_y);
       ptsy.push_back(ego.y);
   } else {
-      // Use the last two points.
       ref_x = previous_path_x[prev_size - 1];
       ref_y = previous_path_y[prev_size - 1];
-      //std::cout << "Second: " << previous_path_x[prev_size - 2] << " " << previous_path_x[prev_size - 1] << std::endl;
       double ref_x_prev = previous_path_x[prev_size - 2];
       double ref_y_prev = previous_path_y[prev_size - 2];
       ref_yaw = atan2(ref_y-ref_y_prev, ref_x-ref_x_prev);
@@ -274,7 +262,9 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
       ptsy.push_back(ref_y_prev);
       ptsy.push_back(ref_y);
   }
+  
   int lane = target_lane;
+  // cout << "target lane : " << lane << endl;
   // Setting up target points in the future.
   vector<double> next_wp0 = getXY(ego.s + 30, 2 + 4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
   vector<double> next_wp1 = getXY(ego.s + 60, 2 + 4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
@@ -295,9 +285,13 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
 
     ptsx[i] = shift_x * cos(0 - ref_yaw) - shift_y * sin(0 - ref_yaw);
     ptsy[i] = shift_x * sin(0 - ref_yaw) + shift_y * cos(0 - ref_yaw);
-    //std::cout << ptsx[i] << " " << ptsy[i] << std::endl;
+    // std::cout << ptsx[i] << " " << ptsy[i] << std::endl;
   }
-
+  // std:cout << ego << std::endl;
+  
+  // std::cout << "Incoming data " << std::endl;
+  // std::cout << std::make_pair(next_x_vals, next_y_vals) << std::endl;
+  
   // Create the spline.
   tk::spline s;
   s.set_points(ptsx, ptsy);
@@ -315,7 +309,7 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
   double x_add_on = 0;
 
   for( int i = 1; i < 50 - prev_size; i++ ) {
-    ref_vel += MAX_ACCL;
+    ref_vel += ego.v_delta;
     if ( ref_vel > MAX_SPEED ) {
       ref_vel = MAX_SPEED;
       //std::cout << "limiting speed to " << ref_vel << std::endl;
@@ -337,8 +331,11 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
 
     x_point += ref_x;
     y_point += ref_y;
-
+    
+    
     next_x_vals.push_back(x_point);
     next_y_vals.push_back(y_point);
   }
+  //std::cout << "Output for simulator " << std::endl;
+  //std::cout << std::make_pair(next_x_vals, next_y_vals) << std::endl;
 }
