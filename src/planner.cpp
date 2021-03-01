@@ -161,7 +161,7 @@ Ego_State Planner::execute_next_state() {
 }
 
 bool Planner::is_lane_valid(int lane){
-  return (lane >= 1) && (lane <3);
+  return (lane >= 0) && (lane <3);
 }
 
 Ego_State Planner::execute_followlane() {
@@ -180,14 +180,14 @@ Ego_State Planner::execute_followlane() {
         ego.v_magnitude = ahead->v_magnitude; // TODO: Check this ??
         return Ego_State::lanechange_left;
       } 
-      cout << "left lane not clear. checking for vehicle on right lane with lane index " << ego.lane+1 << endl;
+      // cout << "left lane not clear. checking for vehicle on right lane with lane index " << ego.lane+1 << endl;
       if (is_lane_valid(ego.lane+1) && is_lane_clear(ego.lane+1)) {
         cout << "right lane clear .." << endl;    
         target_lane = ego.lane+1;
         return Ego_State::lanechange_right;
       } else {
         // no where to go. declerate and stay on the current lane
-        cout << "no free lanes to change. slow down in current lane .. " << endl;
+        // cout << "no free lanes to change. slow down in current lane .. " << endl;
         ego.v_delta -= MAX_ACCL;
         return Ego_State::follow_vehicle_in_lane;
       }

@@ -49,15 +49,13 @@ Vehicle::Vehicle( int id, double x, double y, double vx, double vy, double s, do
   
   lane = get_lane(d); 
   v_delta = 0.0;
-  //std::cout << "New vehicle-" << this->id << " at lane :" << lane << std::endl; 
 }
 
 Vehicle::~Vehicle() {
-  //std::cout << "Delete vehicle-" << this->id << " at lane :" << lane << std::endl; 
 }
 
 void Vehicle::update_kinematics(double delta_t) {
-  this->s+= v_magnitude*delta_t;
+  this->s+= v_magnitude*delta_t; //TODO include the acceleration component as well
 }
 
 double Vehicle::get_distance_to (Vehicle *other) {
