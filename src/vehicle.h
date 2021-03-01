@@ -35,9 +35,6 @@ public:
   double yaw;
   // lane on which the vehicle is currently driving
   int lane;
-  //position w.r.t to the ego vehicle
-  bool ahead;
-  bool in_same_lane; bool in_right_lane; bool in_left_lane;
 };
 
 #endif  // VEHICLE_H
