@@ -87,7 +87,7 @@ const int COST_LEGALITY    = 100; //
 const int COST_COMFORT     = 10; // 
 const int COST_EFFICIENCY  = 1; // 
 
-const int HORIZON_IN_METERS = 30;
+const int SAFETY_DISTANCE = 30;
 static constexpr double CYCLE_TIME = 0.02; 
 const int PREDICTION_DISTANCE = 50; 
 static constexpr double PREDICTION_TIME = CYCLE_TIME * (double) PREDICTION_DISTANCE;

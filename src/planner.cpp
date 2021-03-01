@@ -10,19 +10,16 @@ using std::pair;
 
 const char * state_names[] = { "INIT", "FOLLOW CAR AHEAD", "PREP TO TRUN LEFT", "LANE CHANGE LEFT", "PREP TO TRUN RIGHT", "LANE CHANGE RIGHT"};
 
-Planner::Planner()
-{
+Planner::Planner(){
   current_state = Ego_State::follow_vehicle_in_lane;
   target_lane = START_LANE;
 }
 
-Planner::~Planner()
-{
+Planner::~Planner(){
   
 }
 
 void Planner::add_ego(double x, double y, double s, double d, double yaw, double velocity) {
-  //cout << "adding ego with s value " << s << endl;
   ego = Vehicle(-1, x , y , 0, 0, s, d);
 }
 
@@ -49,7 +46,6 @@ void Planner::update_vehicle(Vehicle *vehicle) {
   if (iterator != other_vehicles.end()) {
     delete (*iterator).second;    
     (*iterator).second = vehicle;
-    // cout << "vehicle id:" << vehicle->id << " updated." << endl;
   } else { //vehicle not found. Add a new vehicle to the map
     add_vehicle(vehicle);
   }
@@ -58,7 +54,6 @@ void Planner::update_vehicle(Vehicle *vehicle) {
 void Planner::add_vehicle(Vehicle *vehicle)
 {
   other_vehicles.insert(pair<int, Vehicle *>(vehicle->id, vehicle));
-  // cout << "inserting vehicle id:" << vehicle->id << endl;
 }
 
 int Planner::get_vehicle_count() {
@@ -73,7 +68,6 @@ void Planner::set_waypoints(vector<double> &map_x, vector<double> &map_y, vector
 
 void Planner::predict(double delta_t){
   ego.update_kinematics(delta_t);
-  //cout << "checking on " << other_vehicles.size() << " vehicles" << endl;
   for (auto &obj: other_vehicles) {
     obj.second->update_kinematics(delta_t);
   }
@@ -88,16 +82,15 @@ void Planner::remove_other_vehicles() {
 }
 
 bool Planner::is_lane_clear (int lane) {
-  Vehicle *next_vehicle = nullptr;
   bool result = true;
   for (auto obj: other_vehicles) {
     if (obj.second->lane == lane) {
-      //if the difference between a vehicle and the ego is less than 30
-      /*if ( abs( ego.s - obj.second->s ) < 25) {
+      //if the difference between a vehicle and the ego is less than <<SAFETY_DISTANCE>>
+      /*if ( abs( ego.s - obj.second->s ) < SAFETY_DISTANCE) {
         cout << "Vehicle " << obj.second->id << " is quite near the ego. obj.s value is " 
         << obj.second->s << " ego.s is " << ego.s << endl;
-      }*/  
-      result &= abs(obj.second->s - ego.s) > 25;
+      } */
+      result &= abs(obj.second->s - ego.s) > SAFETY_DISTANCE;
     }
   }
   return result;
@@ -162,7 +155,6 @@ Ego_State Planner::execute_next_state() {
       break;
   }
   if (new_state != current_state) {
-    // cout << "Lane state change: new=" << state_names[new_state] << ", previous= " << state_names[current_state] << endl;
     current_state = new_state;
   }
   return current_state;
@@ -181,21 +173,21 @@ Ego_State Planner::execute_followlane() {
     if ((ahead->s > ego.s) && ((ahead->s - ego.s) < 30)) //TODO check for vehicles from behind
     { 
       //cout << "vehicle " << ahead->id << " ahead within a reaching distance of  " << (ahead->s - ego.s) << endl;
-      cout << "checking for vehicle on left lane with index " << ego.lane-1 << endl;      
+      cout << "checking for vehicle on left lane with lane index " << ego.lane-1 << endl;      
       if (is_lane_valid(ego.lane-1) && is_lane_clear(ego.lane-1)){ 
         cout << "left lane clear .." << endl;       
         target_lane = ego.lane-1;
         ego.v_magnitude = ahead->v_magnitude; // TODO: Check this ??
         return Ego_State::lanechange_left;
       } 
-      cout << "left lane not clear. checking for vehicle on right lane with index " << ego.lane+1 << endl;
+      cout << "left lane not clear. checking for vehicle on right lane with lane index " << ego.lane+1 << endl;
       if (is_lane_valid(ego.lane+1) && is_lane_clear(ego.lane+1)) {
         cout << "right lane clear .." << endl;    
         target_lane = ego.lane+1;
         return Ego_State::lanechange_right;
       } else {
         // no where to go. declerate and stay on the current lane
-        cout << "no where to go. slow down .... " << endl;
+        cout << "no free lanes to change. slow down in current lane .. " << endl;
         ego.v_delta -= MAX_ACCL;
         return Ego_State::follow_vehicle_in_lane;
       }

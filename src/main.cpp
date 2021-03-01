@@ -124,7 +124,7 @@ int main() {
 
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
           // clear the pointers to other vehicles.
-          // planner.remove_other_vehicles();
+          planner.remove_other_vehicles();
         }  // end "telemetry" if
       } else {
         // Manual driving
