@@ -89,8 +89,8 @@ const int COST_EFFICIENCY  = 1; //
 
 const int SAFETY_DISTANCE = 30;
 static constexpr double CYCLE_TIME = 0.02; 
-const int PREDICTION_DISTANCE = 50; 
-static constexpr double PREDICTION_TIME = CYCLE_TIME * (double) PREDICTION_DISTANCE;
-
+const int PREDICTION_HORIZON = 50; 
+static constexpr double PREDICTION_TIME = CYCLE_TIME * (double) PREDICTION_HORIZON;
+const double FACTOR_MPH_TO_MS =2.24;
 
 #endif  // CONFIG_H

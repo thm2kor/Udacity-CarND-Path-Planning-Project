@@ -55,6 +55,8 @@ Vehicle::~Vehicle() {
 }
 
 void Vehicle::update_kinematics(double delta_t) {
+  // future predicted Frenet s value will be its current s value plus its 
+  // (transformed) total velocity (m/s) multiplied by the time elapsed 
   this->s+= v_magnitude*delta_t; //TODO include the acceleration component as well
 }
 

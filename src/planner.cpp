@@ -173,7 +173,7 @@ Ego_State Planner::execute_followlane() {
     if ((ahead->s > ego.s) && ((ahead->s - ego.s) < 30)) //TODO check for vehicles from behind
     { 
       //cout << "vehicle " << ahead->id << " ahead within a reaching distance of  " << (ahead->s - ego.s) << endl;
-      cout << "checking for vehicle on left lane with lane index " << ego.lane-1 << endl;      
+      //cout << "checking for vehicle on left lane with lane index " << ego.lane-1 << endl;      
       if (is_lane_valid(ego.lane-1) && is_lane_clear(ego.lane-1)){ 
         cout << "left lane clear .." << endl;       
         target_lane = ego.lane-1;
@@ -230,16 +230,17 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
   double ref_x = ego.x;
   double ref_y = ego.y;
   double ref_yaw = deg2rad(ego.yaw);
+  
   int prev_size = previous_path_x.size();
-
+  //build-up 5 coarse anchor-points for the vehicle trajectory
   if ( prev_size < 2 ) {
-      double prev_car_x = ego.x - cos(ego.yaw);
-      double prev_car_y = ego.y - sin(ego.yaw);
+      // double prev_car_x = ego.x - cos(ego.yaw);
+      // double prev_car_y = ego.y - sin(ego.yaw);
 
-      ptsx.push_back(prev_car_x);
+      ptsx.push_back(ego.x - cos(ego.yaw));
       ptsx.push_back(ego.x);
 
-      ptsy.push_back(prev_car_y);
+      ptsy.push_back(ego.y - sin(ego.yaw));
       ptsy.push_back(ego.y);
   } else {
       ref_x = previous_path_x[prev_size - 1];
@@ -291,7 +292,7 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
 
   double x_add_on = 0;
 
-  for( int i = 1; i < 50 - prev_size; i++ ) {
+  for( int i = 1; i < PREDICTION_HORIZON - prev_size; i++ ) {
     reference_velocity += ego.v_delta;
     if ( reference_velocity > MAX_SPEED ) {
       reference_velocity = MAX_SPEED;
@@ -299,7 +300,7 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
       reference_velocity = MAX_ACCL;
     }
 
-    double N = target_dist/(0.02*reference_velocity/2.24);
+    double N = target_dist/(CYCLE_TIME * reference_velocity/ FACTOR_MPH_TO_MS);
     double x_point = x_add_on + target_x/N;
     double y_point = s(x_point);
 
@@ -312,8 +313,7 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
     y_point = x_ref * sin(ref_yaw) + y_ref * cos(ref_yaw);
 
     x_point += ref_x;
-    y_point += ref_y;
-    
+    y_point += ref_y;    
     
     next_x_vals.push_back(x_point);
     next_y_vals.push_back(y_point);
