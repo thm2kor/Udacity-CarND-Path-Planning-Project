@@ -93,7 +93,7 @@ int main() {
           double end_path_d = j[1]["end_path_d"];
           
           // Sensor Fusion Data, a list of all other cars on the same side 
-          //   of the road.
+          // of the road.
           auto sensor_fusion = j[1]["sensor_fusion"];
           
           // Provided previous path point size.
@@ -106,7 +106,6 @@ int main() {
           json msgJson;
 
           // set-up the traffic environment for the planner.
-          // std::cout << "Planner current state is " << planner.current_state << std::endl;
           planner.add_ego(car_x, car_y, car_s, car_d, car_yaw, car_speed);
           planner.add_other_traffic_participants(sensor_fusion);
           planner.set_waypoints(map_waypoints_x, map_waypoints_y, map_waypoints_s);          
