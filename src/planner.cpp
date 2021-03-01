@@ -33,8 +33,9 @@ Vehicle Planner::get_ego() {
 //Prepares a vector of Vehicle objects representing the state of other traffic participants
 void Planner::add_other_traffic_participants (vector<vector<double>> sensor_fusion) {
   for (int i = 0; i < sensor_fusion.size(); i++) {
-    double d = sensor_fusion[i][6];             
-    if (d >= 0 && d <= d_right(LANE_RIGHT)) { // only add vehicles in valid lanes
+    double d = sensor_fusion[i][6]; 
+    int lane = get_lane(d);
+    if (lane >=0 && lane <3) { // only add vehicles in valid lanes
       Vehicle *vehicle = new Vehicle(sensor_fusion[i][0], sensor_fusion[i][1],
                               sensor_fusion[i][2], sensor_fusion[i][3], sensor_fusion[i][4], 
                               sensor_fusion[i][5], sensor_fusion[i][6]);
@@ -194,16 +195,14 @@ Ego_State Planner::execute_followlane() {
       cout << "checking for vehicle on left lane with lane index " << ego.lane-1 << endl; 
 #endif     
       if (is_lane_valid(ego.lane-1) && is_lane_clear(ego.lane-1)) { 
-        cout << "left lane clear .." << endl;       
         target_lane = ego.lane-1;
-        ego.v_magnitude = ahead->v_magnitude; // TODO: Check this ??
+        // ego.v_magnitude = ahead->v_magnitude; // TODO: Check this ??
         return Ego_State::lanechange_left;
       } 
 #ifdef DEBUG
       cout << "left lane not clear. checking for vehicle on right lane with lane index " << ego.lane+1 << endl;
 #endif
       if (is_lane_valid(ego.lane+1) && is_lane_clear(ego.lane+1)) {
-        cout << "right lane clear .." << endl;    
         target_lane = ego.lane+1;
         return Ego_State::lanechange_right;
       } else {

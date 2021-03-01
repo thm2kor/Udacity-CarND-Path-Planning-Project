@@ -61,10 +61,7 @@ double ms_to_mph(double ms);
 
 // return lane index based on the d frenet value
 int get_lane(double d);
-// return the 'd' coordinates of a given lanes
-int d_left(int lane);
-int d_center(int lane) ;
-int d_right(int lane) ;
+
 
 // Global Constants for the Project
 // Road parameters

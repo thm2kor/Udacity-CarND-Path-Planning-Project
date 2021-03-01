@@ -62,20 +62,16 @@ double ms_to_mph(double ms) {
 
 // return lane index based on the d frenet value
 int get_lane(double d) { 
-  return (int)(d / LANE_WIDTH); 
-}
-
-// return the 'd' coordinates of a given lanes
-int d_left(int lane) { 
-  return (double)(lane * LANE_WIDTH); 
-}
-
-int d_center(int lane) { 
-  return (double)((lane + 0.5) * LANE_WIDTH); 
-}
-
-int d_right(int lane) {
-  return (double)((lane + 1) * LANE_WIDTH); 
+  // return (int)(d / LANE_WIDTH);
+  int result = -1;
+  if ( d > 0 && d < 4 ) {
+    result = 0;
+  } else if ( d > 4 && d < 8 ) {
+    result = 1;
+  } else if ( d > 8 && d < 12 ) {
+    result = 2;
+  } 
+  return result;
 }
 
 // For converting back and forth between radians and degrees.
