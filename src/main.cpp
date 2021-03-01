@@ -110,7 +110,7 @@ int main() {
           planner.add_other_traffic_participants(sensor_fusion);
           planner.set_waypoints(map_waypoints_x, map_waypoints_y, map_waypoints_s);          
           // predict the next position of the based on the kinematic motion models
-          planner.predict(PREDICTION_TIME);
+          planner.predict( prev_size * CYCLE_TIME);
           // get the next plausible state
           planner.execute_next_state();
           // calculate the trajectory

@@ -62,7 +62,6 @@ double ms_to_mph(double ms);
 // return lane index based on the d frenet value
 int get_lane(double d);
 
-
 // Global Constants for the Project
 // Road parameters
 const int LANE_WIDTH = 4;
