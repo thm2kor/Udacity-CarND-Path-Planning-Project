@@ -1,19 +1,23 @@
 #include <iostream>
+#include <algorithm>
+#include <iterator>
 #include "planner.h"
 #include "spline.h"
 #include "config.h"
+#include <limits>
 
 using std::vector;
 using std::cout;
 using std::endl;
 using std::pair;
 
-const char * state_names[] = { "INIT", "FOLLOW CAR AHEAD", "PREP TO TRUN LEFT", "LANE CHANGE LEFT", "PREP TO TRUN RIGHT", "LANE CHANGE RIGHT"};
+const char * state_names[] = { "INIT", "FOLLOW CAR AHEAD", "LANE CHANGE LEFT", "LANE CHANGE RIGHT"};
 
 Planner::Planner() {
   current_state = Ego_State::follow_vehicle_in_lane;
   target_lane = START_LANE;
   avg_lane_velocity = {0.0, 0.0, 0.0};
+  too_close_vehicles = {std::numeric_limits<int>::max(), std::numeric_limits<int>::max(), std::numeric_limits<int>::max()};
   ego_key = -1;
 }
 
@@ -22,7 +26,14 @@ Planner::~Planner() {
 
 // Add the ego vehicle object with ego_key
 void Planner::add_ego(double x, double y, double s, double d, double yaw, double velocity) {
-  ego = Vehicle(ego_key, x , y , 0, 0, s, d);
+  ego = Vehicle();
+  ego.id = ego_key;
+  ego.x = x;
+  ego.y = y;
+  ego.s = s;
+  ego.d = d;
+  ego.yaw = yaw;
+  ego.lane = get_lane(d);
 }
 
 //Returns the ego vehicle object
@@ -70,12 +81,35 @@ void Planner::set_waypoints(vector<double> &map_x, vector<double> &map_y, vector
   map_waypoints_s = map_s;
 }
 
+void Planner::update_vehicle_positions() {
+  for (int i=0; i < too_close_vehicles.size(); i++) {
+    vector<float> positions;
+    for (auto &obj: other_vehicles) {
+      if (obj.second->lane == i) {
+        positions.push_back(obj.second->s_diff);
+      }      
+    }
+    if ( positions.size() > 0 )
+    {
+      vector<float>::iterator min_dist = std::min_element(std::begin(positions), std::end(positions));
+      int best_idx = std::distance(begin(positions), min_dist);
+      too_close_vehicles[i] = positions[best_idx];      
+    }
+  }
+}
+
 // Predicts the position of the ego and non-ego vehicles after a time interval.
 void Planner::predict(double delta_t){
+  calculate_lane_velocities();
+
   ego.update_kinematics(delta_t);
   for (auto &obj: other_vehicles) { // iterate all the non-ego vehicles
     obj.second->update_kinematics(delta_t);
+    // update the situation context of Ego vehicle
+    obj.second->s_diff = fabs(obj.second->s - ego.s);
   }
+  // Update the vehicle collision metrics. Required for Safety cost estimation.
+  update_vehicle_positions();
 }
 
 // Remove the non-ego vehicle objects after a cycle of prediction and update.
@@ -178,15 +212,35 @@ bool Planner::is_lane_valid(int lane){
   return (lane >= 0) && (lane <3);
 }
 
+vector<Ego_State> Planner::successor_states() {
+  vector<Ego_State> states;
+  states.push_back(Ego_State::follow_vehicle_in_lane);
+  if (ego.lane != 0){
+    states.push_back(Ego_State::lanechange_left);
+  } 
+  if (ego.lane < 2){
+    states.push_back(Ego_State::lanechange_right);
+  }
+  return states;
+}
+
 // Executes the follow_lane state. This is the default state for the ego.
 // If ego vehicle within 30 meters (configurable) in front a vehicle, it
 // evaluates alternate states and a cost for each of the possible states.
 // The state with the lowest cost is returned for the next execution cycle.
 Ego_State Planner::execute_followlane() {
+  //get possible trajectories for the current state
+  //vector<Ego_State> states = successor_states();
 
+  // Find the lane with the fastest "lane" velocity
+  /* vector<double>::iterator best_cost = std::max_element(std::begin(avg_lane_velocity), std::end(avg_lane_velocity));
+  int best_idx = std::distance(begin(avg_lane_velocity), best_cost);
+  cout << "Lane velocities are : " << avg_lane_velocity << " ==> Max velocity at idx : " << best_idx << endl;
+  */
+  
+  
   Ego_State new_state = Ego_State::follow_vehicle_in_lane;
   Vehicle *ahead = get_vehicle_ahead(ego.lane);
-  
   if (ahead) { 
     if ((ahead->s > ego.s) && ((ahead->s - ego.s) < SAFETY_DISTANCE)) //TODO check for vehicles from behind
     { 
@@ -196,7 +250,7 @@ Ego_State Planner::execute_followlane() {
 #endif     
       if (is_lane_valid(ego.lane-1) && is_lane_clear(ego.lane-1)) { 
         target_lane = ego.lane-1;
-        // ego.v_magnitude = ahead->v_magnitude; // TODO: Check this ??
+        ego.v_magnitude = ahead->v_magnitude; // TODO: Check this ??
         return Ego_State::lanechange_left;
       } 
 #ifdef DEBUG
@@ -345,5 +399,37 @@ void Planner::prepare_trajectory (vector<double> previous_path_x, vector<double>
     
     next_x_vals.push_back(x_point);
     next_y_vals.push_back(y_point);
+  }
+}
+
+void Planner::calculate_lane_velocities() {
+  avg_lane_velocity = {0.0, 0.0, 0.0};
+  vector<double> sum_velocities = {0.0, 0.0, 0.0};
+  vector<int> number_vehicles = {0, 0, 0};
+
+  for (auto obj: other_vehicles) {
+    double delta_s = obj.second->s - ego.s;
+    if (obj.second->lane != ego.lane && delta_s > 0.0 && delta_s < 100) {
+      sum_velocities[obj.second->lane] += obj.second->v_magnitude;
+      number_vehicles[obj.second->lane] += 1;
+    }
+  }
+
+  // determine ego lane velocity on vehicle ahead only
+  Vehicle *ahead = get_vehicle_ahead(ego.lane);
+
+  if (ahead) {
+    sum_velocities[ego.lane] = ahead->v_magnitude;
+  } else {
+    sum_velocities[ego.lane] = MAX_SPEED;
+  }
+  number_vehicles[ego.lane] = 1;
+
+  for (int i=0; i<avg_lane_velocity.size(); i++) {
+    if ( number_vehicles[i] == 0 ) {
+      avg_lane_velocity[i] = MAX_SPEED;
+    } else {
+      avg_lane_velocity[i] = std::min (MAX_SPEED, sum_velocities[i] / number_vehicles[i]);
+    }
   }
 }

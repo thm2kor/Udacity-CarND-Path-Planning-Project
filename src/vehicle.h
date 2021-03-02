@@ -35,6 +35,8 @@ public:
   double yaw;
   // lane on which the vehicle is currently driving
   int lane;
+  // difference in s-vallue w.r.t to the Ego vehicle.
+  float s_diff; 
 };
 
 #endif  // VEHICLE_H

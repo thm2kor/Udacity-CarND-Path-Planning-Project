@@ -2,12 +2,14 @@
 #define PLANNER_H
 
 #include <string>
+#include <cstdio>
 #include <vector>
 #include <map>
 #include <cstdio>
 #include <math.h>
 #include "vehicle.h"
 #include "config.h"
+
 
 using std::vector;
 
@@ -22,7 +24,7 @@ private:
   
   double ego_lane_velocity;               // velocity of vehicle ahead in the ego lane
   vector<double> avg_lane_velocity;       // velocities of non-ego lanes. 
-  
+  vector<double> too_close_vehicles;       // s_diff of ego lanes to ith lane
   vector<double> map_waypoints_x;         // x-coordinates of way-points
   vector<double> map_waypoints_y;         // y-coordinates of way-points
   vector<double> map_waypoints_s;         // s-coordinates of way-points
@@ -30,6 +32,8 @@ private:
 public:
   vector<double> next_x_vals;             // x-coordinates of points which would be sent to the simulator
   vector<double> next_y_vals;             // y-coordinates of points which would be sent to the simulator
+
+ 
 public:
   Planner();
   ~Planner();
@@ -55,7 +59,9 @@ public:
   Ego_State execute_followlane();
   Ego_State execute_left_lanechange();
   Ego_State execute_right_lanechange();
-  
+  void calculate_lane_velocities();
+  void update_vehicle_positions();
+  vector<Ego_State> successor_states();
   // Stage 4: Execute Trajectory
   void prepare_trajectory (vector<double> previous_path_x, vector<double> previous_path_y, double end_path_s, double &ref_vel);
   

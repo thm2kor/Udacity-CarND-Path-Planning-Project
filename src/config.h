@@ -4,20 +4,14 @@
 #include <math.h>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <iterator>
 #include <iostream>
 #include "vehicle.h"
 #include <map>
 // for convenience
 using std::string;
 using std::vector;
-
-// debug functions for dumping the objects
-std::ostream& operator<<(std::ostream& strm, const Vehicle &a);
-std::ostream& operator<<(std::ostream& strm, std::map<int, Vehicle> &vehicles);
-std::ostream& operator<<(std::ostream& strm, std::map<int ,vector<Vehicle>> &trajectories);
-std::ostream& operator<<(std::ostream& strm, vector<Vehicle> &vehicles);
-std::ostream& operator<<(std::ostream& strm, std::pair<std::vector<double>, std::vector<double>> points);
-std::ostream& operator<<(std::ostream& strm, const vector<float> &d);
 
 enum Ego_State {
   invalid_state               = 0,
@@ -31,6 +25,17 @@ enum lanes {
   center    = 1,
   right     = 2,
 };
+// debug functions for dumping the objects
+std::ostream& operator<<(std::ostream& strm, const Vehicle &a);
+std::ostream& operator<<(std::ostream& strm, std::map<int, Vehicle> &vehicles);
+std::ostream& operator<<(std::ostream& strm, std::map<int ,vector<Vehicle>> &trajectories);
+std::ostream& operator<<(std::ostream& strm, vector<Vehicle> &vehicles);
+std::ostream& operator<<(std::ostream& strm, std::pair<std::vector<double>, std::vector<double>> points);
+std::ostream& operator<<(std::ostream& strm, const vector<float> &d);
+std::ostream& operator<<(std::ostream& strm, const vector<double> &d);
+std::ostream& operator<<(std::ostream& strm, const vector<Ego_State> &d);
+
+
 
 double deg2rad(double x); 
 double rad2deg(double x); 
@@ -54,7 +59,7 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s,
                      const vector<double> &maps_x, 
                      const vector<double> &maps_y) ;
 
-
+double logistic(double x);
 //convert speed between SI and US metric systems
 double mph_to_ms(double mph);
 double ms_to_mph(double ms); 

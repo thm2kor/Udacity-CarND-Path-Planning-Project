@@ -51,6 +51,32 @@ std::ostream& operator<<(std::ostream& strm, const vector<float> &d) {
   return strm << "]" << std::endl ;
 }
 
+std::ostream& operator<<(std::ostream& strm, const vector<double> &d) {
+  strm << "[" ;
+  for (int i=0;i<d.size();i++) {
+    strm << d[i];
+    if (i != d.size() - 1)
+         strm << ", ";
+  } 
+  return strm << "]";
+}
+
+std::ostream& operator<<(std::ostream& strm, const vector<Ego_State> &d) {
+  strm << "[" ;
+  for (int i=0;i<d.size();i++) {
+    strm << d[i];
+    if (i != d.size() - 1)
+         strm << ", ";
+  } 
+  return strm << "]";
+}
+
+double logistic(double x) {
+  // A function that returns a value between 0 and 1 for x in the range[0, infinity] and - 1 to 1 for x in 
+  // the range[-infinity, infinity]. Useful for cost functions.
+  return 2.0 / (1 + exp(-x)) - 1.0;
+}
+
 //convert speed between SI and US metric systems
 double mph_to_ms(double mph) { 
   return mph / 2.24; 

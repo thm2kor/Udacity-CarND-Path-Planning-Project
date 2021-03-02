@@ -27,6 +27,8 @@ Vehicle::Vehicle(){
 
   lane = -1;
   v_delta = 0.0;
+
+  s_diff = 0.0;
 }
 
 Vehicle::Vehicle( int id, double x, double y, double vx, double vy, double s, double d) {
@@ -49,6 +51,8 @@ Vehicle::Vehicle( int id, double x, double y, double vx, double vy, double s, do
   
   lane = get_lane(d); 
   v_delta = 0.0;
+  s_diff = 0.0;
+
 }
 
 Vehicle::~Vehicle() {
@@ -73,3 +77,4 @@ double Vehicle::get_collision_time_to (Vehicle *other) {
   double dist = sqrt(pow((other->x - this->x), 2) + pow((other->y - this->y), 2));
   return abs(dist / (this->v_magnitude - other->v_magnitude));
 }
+
