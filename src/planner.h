@@ -62,6 +62,7 @@ public:
   void calculate_lane_velocities();
   void update_vehicle_positions();
   vector<Ego_State> successor_states();
+
   // Stage 4: Execute Trajectory
   void prepare_trajectory (vector<double> previous_path_x, vector<double> previous_path_y, double end_path_s, double &ref_vel);
   

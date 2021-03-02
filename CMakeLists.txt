@@ -8,7 +8,7 @@ add_compile_definitions(NO_DEBUG)
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
-set(sources src/main.cpp src/config.cpp src/planner.cpp src/vehicle.cpp)
+set(sources src/main.cpp src/config.cpp src/planner.cpp src/vehicle.cpp src/cost.cpp)
 
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") 

@@ -81,12 +81,7 @@ const int START_LANE = LANE_CENTER;
 const double MAX_SPEED = 49.5; // speed limit in miles
 const double MAX_ACCL = 0.224; // 
 const double MAX_DECL = 0.224; // 
-// Weightages for costs
-const int COST_FEASIBILITY = 10000; // 
-const int COST_SAFETY      = 1000; // 
-const int COST_LEGALITY    = 100; // 
-const int COST_COMFORT     = 10; // 
-const int COST_EFFICIENCY  = 1; // 
+
 
 const int SAFETY_DISTANCE = 30;
 static constexpr double CYCLE_TIME = 0.02; 

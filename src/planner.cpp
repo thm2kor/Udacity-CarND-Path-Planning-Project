@@ -1,10 +1,12 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include "cost.h"
 #include "planner.h"
 #include "spline.h"
 #include "config.h"
 #include <limits>
+#include <functional>
 
 using std::vector;
 using std::cout;
@@ -230,14 +232,14 @@ vector<Ego_State> Planner::successor_states() {
 // The state with the lowest cost is returned for the next execution cycle.
 Ego_State Planner::execute_followlane() {
   //get possible trajectories for the current state
-  //vector<Ego_State> states = successor_states();
-
-  // Find the lane with the fastest "lane" velocity
-  /* vector<double>::iterator best_cost = std::max_element(std::begin(avg_lane_velocity), std::end(avg_lane_velocity));
-  int best_idx = std::distance(begin(avg_lane_velocity), best_cost);
-  cout << "Lane velocities are : " << avg_lane_velocity << " ==> Max velocity at idx : " << best_idx << endl;
-  */
+  vector<Ego_State> states = successor_states();
   
+  // Find the lane with the fastest "lane" velocity
+  /*vector<double>::iterator best_cost = std::max_element(std::begin(avg_lane_velocity), std::end(avg_lane_velocity));
+  int best_idx = std::distance(begin(avg_lane_velocity), best_cost);
+  cout << "Lane velocities are : " << avg_lane_velocity << " ==> Max velocity at idx : " << best_idx << endl;*/
+  double best_cost = 0.0;
+  int index = calculate_best_cost( *this , best_cost); 
   
   Ego_State new_state = Ego_State::follow_vehicle_in_lane;
   Vehicle *ahead = get_vehicle_ahead(ego.lane);
