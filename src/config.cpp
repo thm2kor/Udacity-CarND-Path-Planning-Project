@@ -224,3 +224,12 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s,
 
   return {x,y};
 }
+
+bool is_same_value( std::vector<double> a) {
+  for (unsigned i = 0; i < a.size(); i++) {
+      if (a[i] != a[0]) {
+          return false;
+      }
+  }
+  return true;
+}

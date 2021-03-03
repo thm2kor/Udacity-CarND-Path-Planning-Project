@@ -36,7 +36,7 @@ std::ostream& operator<<(std::ostream& strm, const vector<double> &d);
 std::ostream& operator<<(std::ostream& strm, const vector<Ego_State> &d);
 
 
-
+bool is_same_value( std::vector<double> a) ;
 double deg2rad(double x); 
 double rad2deg(double x); 
 

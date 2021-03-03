@@ -23,8 +23,7 @@ private:
   int target_lane = 0;                    // The trajectory of the ego vehicle will 
   
   double ego_lane_velocity;               // velocity of vehicle ahead in the ego lane
-  vector<double> avg_lane_velocity;       // velocities of non-ego lanes. 
-  vector<double> too_close_vehicles;       // s_diff of ego lanes to ith lane
+
   vector<double> map_waypoints_x;         // x-coordinates of way-points
   vector<double> map_waypoints_y;         // y-coordinates of way-points
   vector<double> map_waypoints_s;         // s-coordinates of way-points
@@ -32,8 +31,8 @@ private:
 public:
   vector<double> next_x_vals;             // x-coordinates of points which would be sent to the simulator
   vector<double> next_y_vals;             // y-coordinates of points which would be sent to the simulator
-
- 
+  vector<double> avg_lane_velocity;       // velocities of non-ego lanes. 
+  vector<double> too_close_vehicles;       // s_diff of ego lanes to ith lane
 public:
   Planner();
   ~Planner();
