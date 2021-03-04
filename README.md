@@ -2,6 +2,8 @@
 Self-Driving Car Engineer Nanodegree Program
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
+![cover_image](./path-planning.png)
+
 ## Objective
 The objective of this project is to  design a path planner that is able to create smooth, safe paths for a car to follow along a 3 lane highway with traffic. Udacity provided a [simulator](https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2) which provides the car's localization and sensor fusion data. In addition, there is a sparse map list of waypoints around the highway.
 
@@ -68,7 +70,7 @@ The final step in the path planning is the preparation of the trajectory. The pr
 This logic is based on helpful video in Project Highway Driving with David Silver and Aaron Brown.
 
 ## Result
-The vehicle is able to complete the track length of 4.32 miles without any incidents. The ego keeps the speed limits of 49.5 mph and does not exceed the total acceleration of 10 m/s^2 and a jerk of 10 m/s^3. The recording of the result could be found [here](https://www.youtube.com/watch?v=2Hg2GHGQWIE). 
+The vehicle is able to complete the track length of 4.32 miles without any incidents. The ego keeps the speed limits of 49.5 mph and does not exceed the total acceleration of 10 m/s^2 and a jerk of 10 m/s^3. The recording of the result could be found [here](https://www.youtube.com/watch?v=2Hg2GHGQWIE).
 
 ## Reflection
 
