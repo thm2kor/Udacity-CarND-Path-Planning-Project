@@ -15,20 +15,11 @@ using std::vector;
 const int COST_SAFETY      = 100000; // 
 const int COST_EFFICIENCY  = 1000; // 
 
-
 double safety_cost( const Planner &planner , int index) {
   // penalizes driving behaivour which are closer to other vehicles
   // SAFETY_DISTANCE of 30 m (configurable)
   double cost = 0.0;
   vector<double> data = planner.too_close_vehicles;
-
-  // run the logistic funtion distance difference between current lane and 
-  // the lane with too many vehicles
-  /*if (data[index] < SAFETY_DISTANCE) {
-    cost = 1.0;
-  } else {
-    
-  }*/
   cost = 1.0 / (1 + exp(data[index] - SAFETY_DISTANCE)) ;
   return cost;
 }
@@ -36,12 +27,8 @@ double safety_cost( const Planner &planner , int index) {
 double efficiency_cost( const Planner &planner , int index ) {
   // penalizes lanes with low average velocities
   double cost = 0.0;
-  /*vector<double> data = planner.avg_lane_velocity;
-  // find the index of the min element
-  vector<double>::iterator min = std::min_element(std::begin(data), std::end(data));
-  int idx_min = std::distance(begin(data), min);
-  
-  cost = logistic ((data[index] - data[idx_min]) / MAX_SPEED );*/
+  vector<double> data = planner.avg_lane_velocity;
+  cost = 1.0 / (1 + exp(data[index] - MAX_SPEED)) ;
   return cost;
 }
 

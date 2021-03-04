@@ -25,6 +25,7 @@ enum lanes {
   center    = 1,
   right     = 2,
 };
+
 // debug functions for dumping the objects
 std::ostream& operator<<(std::ostream& strm, const Vehicle &a);
 std::ostream& operator<<(std::ostream& strm, std::map<int, Vehicle> &vehicles);
@@ -35,8 +36,6 @@ std::ostream& operator<<(std::ostream& strm, const vector<float> &d);
 std::ostream& operator<<(std::ostream& strm, const vector<double> &d);
 std::ostream& operator<<(std::ostream& strm, const vector<Ego_State> &d);
 
-
-bool is_same_value( std::vector<double> a) ;
 double deg2rad(double x); 
 double rad2deg(double x); 
 
